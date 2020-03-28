@@ -3,10 +3,13 @@
 
 from pymongo import MongoClient
 
-from CStockRequestBase import gCreateCookieFunc
-from DataCommon import *
-from CStockRequestInfo import *
-from CDatabaseService import *
+from stock.common.utility import *
+from stock.common.enum import *
+from stock.dataservice.source.init import *
+from stock.dataservice.source.stockrequestbase import gCreateCookieFunc
+from stock.dataservice.source.stockrequesthistory import *
+from stock.dataservice.source.stockrequestinfo import *
+from stock.dataservice.source.databaseservice import *
 
 class CUpdateService():
     def __init__(self):

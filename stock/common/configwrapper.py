@@ -2,7 +2,7 @@
 # encoding:utf-8
 
 from configparser import ConfigParser
-from Common import *
+from stock.common.utility import *
 
 class CIniFileWrapper():
     def __init__(self, iPath):

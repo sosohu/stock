@@ -3,7 +3,7 @@
 
 from pymongo import MongoClient
 
-from DataCommon import gConfigFileWrapper
+from stock.dataservice.source.init import gConfigFileWrapper
 
 class CContentService():
     def __init__(self):

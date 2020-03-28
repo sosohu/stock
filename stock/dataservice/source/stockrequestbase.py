@@ -10,7 +10,7 @@ import sys
 import json
 import time
 
-from DataCommon import gConfigFileWrapper
+from stock.dataservice.source.init import gConfigFileWrapper
 
 def gCreateCookieFunc():
     lCookieFile = gConfigFileWrapper.getStr('xue_qiu', 'cookie_file')

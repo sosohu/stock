@@ -1,0 +1,2 @@
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH=$PYTHONPATH:/Users/qhu/work/stock

@@ -3,11 +3,7 @@
 
 import time
 import inspect
-
-class EnumErrorCode():
-    S_OK = 0x0
-    E_Database_Error = 0x10000000
-    E_Update_Error = 0x20000000
+from stock.common.enum import *
 
 def gNowTimeFunc():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 

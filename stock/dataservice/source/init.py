@@ -2,10 +2,9 @@
 # encoding:utf-8
 
 import logging
-from ConfigWrapper import CIniFileWrapper
-from Common import *
+from stock.common.configwrapper import CIniFileWrapper
 
-gConfigFileWrapper = CIniFileWrapper('config.ini')
+gConfigFileWrapper = CIniFileWrapper('stock/dataservice/config.ini')
 
 gLogger = logging.getLogger()
 gLogFile = logging.FileHandler(gConfigFileWrapper.getStr('log', 'file'),encoding='utf-8')

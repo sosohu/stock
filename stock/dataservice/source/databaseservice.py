@@ -6,8 +6,8 @@ import time
 from pymongo import MongoClient
 from enum import Enum
 
-from DataCommon import *
-from Common import *
+from stock.dataservice.source.init import *
+from stock.common.utility import *
 
 class EnumColStockInfo(Enum):
     Symbol = 1

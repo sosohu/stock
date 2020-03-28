@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-from CUpdateService import gUpdateService
+from stock.dataservice.source.updateservice import gUpdateService
 
 def main():
     gUpdateService.updateStocksInfo()

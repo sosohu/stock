@@ -3,8 +3,8 @@
 
 import sys
 
-from data.CStockRequestBase import gCreateCookieFunc
-from data import CStockRequestInfo
+from stock.dataservice.source.stockrequestbase import gCreateCookieFunc
+from stock.dataservice.source.stockrequestinfo import CStockRequestInfo
 
 def main():
     gCreateCookieFunc()
