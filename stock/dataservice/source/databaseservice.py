@@ -75,6 +75,18 @@ class CDatabaseService():
     def __del__(self):
         return
 
+    def getStockSymbols(self, oList):
+        lProjection = {}
+        lProjection[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = 1
+        lResultCursor = self.mColStockInfo.find({}, lProjection)
+        lResultList = list(lResultCursor)
+
+        for lItem in lResultList:
+            oList.append(lItem[self.mColStockInfoKeys[EnumColStockInfo.Symbol]])
+
+        return EnumErrorCode.S_OK
+
+
     def countStockInfo(self, iSymbol):
         lQuery = {}
         lQuery[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = iSymbol
@@ -96,7 +108,6 @@ class CDatabaseService():
             gLogger.warning("{}: {} has {} records".format(gGetCurrentFunctionName(), iSymbol, len(lResultList)))
             return EnumErrorCode.E_Database_Multi_Result
         elif len(lResultList) == 1:
-            oStockInfo = CStockInfo(iSymbol)
             oStockInfo.setName(lResultList[0][self.mColStockInfoKeys[EnumColStockInfo.Name]])
             return EnumErrorCode.S_OK
         else:            
@@ -148,7 +159,6 @@ class CDatabaseService():
             gLogger.warning("{}: {} has {} records".format(gGetCurrentFunctionName(), iSymbol, len(lResultList)))
             return EnumErrorCode.E_Database_Multi_Result
         elif len(lResultList) == 1:
-            oStockHistoy = CStockHistory(iSymbol, iTimestamp)
             lRecord = lResultList[0][self.mColStockHistKeys[EnumColStockHistory.Record]]
             oStockHistoy.setVolume(lRecord[self.mColStockHistRecordKeys[EnumColStockHistoryRecord.Volume]])
             oStockHistoy.setOpenPrice(lRecord[self.mColStockHistRecordKeys[EnumColStockHistoryRecord.Open]])

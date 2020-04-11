@@ -40,7 +40,7 @@ class CUpdateService():
         return EnumErrorCode.S_OK
 
     def updateStockHistory(self, iSymbol, iTimestamp, iCount = -1):
-        lCStockHistoryRequest = CStockRequestHistory(iSymbol, iTimestamp, -1)
+        lCStockHistoryRequest = CStockRequestHistory(iSymbol, iTimestamp, iCount)
         lRetcode, lRetList = lCStockHistoryRequest.getResult()
 
         if gFaiedFunc(lRetcode):
@@ -48,7 +48,9 @@ class CUpdateService():
 
         for lItem in lRetList:
             lNewStockHistory = CStockHistory(iSymbol, lItem['timestamp'])
-            lNewStockHistory.populate(lItem)
+            hr = lNewStockHistory.populate(lItem)
+            if hr != EnumErrorCode.S_OK:
+                continue
 
             lCount = gDatabaseService.countStockHistory(iSymbol, lItem['timestamp'])
             if lCount > 0:
@@ -61,5 +63,15 @@ class CUpdateService():
 
         return EnumErrorCode.S_OK
 
+    def updateAllStockHistory(self, iTimestamp, iCount = -1):
+        lList = []
+        hr = gDatabaseService.getStockSymbols(lList)
+        if gFaiedFunc(hr):
+            return hr
+
+        for lItem in lList:
+            self.updateStockHistory(lItem, iTimestamp, iCount)
+
+        return EnumErrorCode.S_OK
 
 gUpdateService = CUpdateService()

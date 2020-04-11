@@ -109,3 +109,22 @@ db.createCollection("stock_history", {
    }
 });
 
+db.property_info.drop();
+db.createCollection("property_info", {
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         required: [ "prop_name", "prop_val"],
+         properties: {
+            prop_name: {
+               bsonType: "string",
+               description: "system property name"
+            },
+            prop_val: {
+               bsonType: "string",
+               description: "system property value"
+            }
+          }
+      }
+   }
+});

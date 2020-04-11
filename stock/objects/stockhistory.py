@@ -136,6 +136,8 @@ class CStockHistory():
         self.mPCF = iJson['pcf']
         self.mMarketCapital = iJson['market_capital']
 
+        return EnumErrorCode.S_OK
+
     def serialize(self, oJson):
         oJson = {}
         oJson['volume'] = self.mVolume
@@ -153,12 +155,15 @@ class CStockHistory():
         oJson['pcf'] = self.mPCF
         oJson['market_capital'] = self.mMarketCapital
 
+        return EnumErrorCode.S_OK
+
     def __ValidateData(self, iJson):
         for lKey in self.__lStockHistoryDataList:
-            if not iJson[lKey]:
+            if iJson[lKey] is None:
+                gLogger.error("{}: stock history expect key {} not exist".format(gGetCurrentFunctionName(), lKey))
                 return EnumErrorCode.E_Validate_His_Fail
 
         if len(self.__lStockHistoryDataList) != len(iJson):
-            gLogger.warn("{}: stock history data lenght mismatch".format(gGetCurrentFunctionName()))
+            gLogger.warn("{}: stock history data length mismatch".format(gGetCurrentFunctionName()))
 
         return EnumErrorCode.S_OK

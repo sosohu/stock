@@ -63,16 +63,22 @@ class CStockRequestHistory(CStockRequestBase):
     def getResult(self):
         lResponseJson = CStockRequestBase.performRequest(self)
         if not self.__hValidateResult(lResponseJson):
-            return EnumErrorCode.E_Validate_Fail
+            return EnumErrorCode.E_Validate_Fail, None
+
+        if len(lResponseJson["data"]["item"]) == 0:
+            return EnumErrorCode.E_Warehouse_No_Result, None
 
         lResultList = []
         for lItem in lResponseJson["data"]["item"]:
             lResultItem = {}
             for i in range(0, len(lColumnName)):
                 if lColumnName[i][1]:
+                    if lColumnName[i][0] == 'timestamp':
+                        lItem[i] = lItem[i] / 1000
                     lResultItem[lColumnName[i][0]] = lItem[i]
             lResultList.append(lResultItem)
 
+        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lResultList))
         return EnumErrorCode.S_OK, lResultList
 
     def __hValidateResult(self, iDataJson):
