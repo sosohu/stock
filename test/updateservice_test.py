@@ -4,8 +4,7 @@
 from stock.dataservice.source.updateservice import gUpdateService
 
 def main():
-    #gUpdateService.updateStocksInfo()
-    gUpdateService.updateStockHistory('SZ002351', 1584633600)
+    gUpdateService.updateStocksInfo()
 
 if __name__ == "__main__":
     main()

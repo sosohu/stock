@@ -37,4 +37,4 @@ class CStockRequestInfo(CStockRequestBase):
             return EnumErrorCode.S_OK, lResultList
         else:
             gLogger.error("{}: {}".format(gGetCurrentFunctionName(), lResponseJson))
-            return EnumErrorCode.S_OK
+            return EnumErrorCode.E_Warehouse_No_Result

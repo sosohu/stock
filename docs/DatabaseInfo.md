@@ -10,9 +10,6 @@ stock
 {
   symbol: "string", # SH601318
   name: "string", # 中国平安
-  status: "int", # 1
-  create_time: "timestamp", # create timestamp
-  update_time: "timestamp", # update timestamp
 }
 ```
 

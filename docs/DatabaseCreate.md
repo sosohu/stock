@@ -1,12 +1,18 @@
+## Start database
+
+cd data
+mongod --dbpath db
+
+## Create database
 use stock
 show collections
 
-db.stock_info.drop()
+db.stock_info.drop();
 db.createCollection("stock_info", {
    validator: {
       $jsonSchema: {
          bsonType: "object",
-         required: [ "symbol", "name", "status", "create_time", "update_time" ],
+         required: [ "symbol", "name"],
          properties: {
             symbol: {
                bsonType: "string",
@@ -15,23 +21,11 @@ db.createCollection("stock_info", {
             name: {
                bsonType: "string",
                description: "name, required"
-            },
-            status: {
-               bsonType: "int",
-               description: "status, 1 is valid, required"
-            },
-            create_time: {
-               bsonType: "long",
-               description: "create time, required"
-            },
-            update_time: {
-               bsonType: "long",
-               description: "update time, required"
             }
           }
       }
    }
-})
+});
 
 db.stock_history.drop()
 db.createCollection("stock_history", {
@@ -45,7 +39,7 @@ db.createCollection("stock_history", {
                description: "stock code, required"
             },
             timestamp: {
-               bsonType: "long",
+               bsonType: "number",
                description: "information record timestamp(ms), required"
             },
             record: {
@@ -53,59 +47,59 @@ db.createCollection("stock_history", {
                required: [ "volume","open","high","low","close","chg","percent","turnoverrate","amount","pe","pb","ps","pcf","market_capital"],
                properties: {
                   volume: {
-                     bsonType: "long",
+                     bsonType: "number",
                      description: "exchange times"
                   },
                   open: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "open price"
                   },
                   high: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "highest price"
                   },
                   low: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "lowest price"
                   },
                   close: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "close price"
                   },
                   chg: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "price change"
                   },
                   percent: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "price change percent"
                   },
                   turnoverrate: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "turn over rete"
                   },
                   amount: {
-                     bsonType: "long",
+                     bsonType: "number",
                      description: "exchange money"
                   },
                   pe: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "pe"
                   },
                   pb: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "pb"
                   },
                   ps: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "ps"
                   },
                   pcf: {
-                     bsonType: "double",
+                     bsonType: "number",
                      description: "pcf"
                   },
                   market_capital: {
-                     bsonType: "long",
+                     bsonType: "number",
                      description: "market capital"
                   }
                }
@@ -113,5 +107,5 @@ db.createCollection("stock_history", {
          }
       }
    }
-})
+});
 

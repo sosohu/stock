@@ -11,7 +11,6 @@ def main():
 
     lCStockInfoRequest = CStockRequestHistory('SH601318', 1584280231249, 1)
     lHr = lCStockInfoRequest.getResult()
-    print "hr ", lHr
     del lCStockInfoRequest
 
 if __name__ == "__main__":

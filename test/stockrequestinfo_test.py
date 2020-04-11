@@ -10,7 +10,6 @@ def main():
     gCreateCookieFunc()
 
     lCStockInfoRequest = CStockRequestInfo(1)
-    print lCStockInfoRequest.getResult()
     del lCStockInfoRequest
 
 if __name__ == "__main__":

@@ -25,21 +25,41 @@ class CUpdateService():
             if gFaiedFunc(lRetcode):
                 return lRetcode
             for lItem in lRetList:
-                lResultCursor = gDatabaseService.getStockInfo(lItem['symbol'])
-                lResultList = list(lResultCursor)
-                if len(lResultList) > 1:
-                    gLogger.warning("{}: {} has {} records".format(gGetCurrentFunctionName(), lItem['symbol'], len(lResultList)))
+                lNewStockInfo = CStockInfo(lItem['symbol'])
+                lNewStockInfo.populate(lItem)
+
+                lCount = gDatabaseService.countStockInfo(lItem['symbol'])
+                if lCount > 0:
+                    gDatabaseService.removeStockInfo(lItem['symbol'])
+
+                hr = gDatabaseService.updateStockInfo(lItem['symbol'], lNewStockInfo)
+                if hr != EnumErrorCode.S_OK:
+                    gLogger.warning("{}: {}. Update failed: {}".format(gGetCurrentFunctionName(), lItem['symbol'], hr))
                     continue
-                elif len(lResultList) == 1:
-                    if lResultList[0]['name'] == lItem['name']:
-                        gLogger.debug("{}: {} no change, do nothing".format(gGetCurrentFunctionName(), lItem['symbol']))
-                        continue
-                    
-                    gDatabaseService.updateStockInfo(lItem['symbol'], lItem['name'], 1, lResultList[0]['create_time'])
-                    gLogger.debug("{}: {} update success".format(gGetCurrentFunctionName(), lItem['symbol']))
-                else:              
-                    gDatabaseService.updateStockInfo(lItem['symbol'], lItem['name'], 1, gNowTimeStampFunc())
-                    gLogger.debug("{}: {} insert success".format(gGetCurrentFunctionName(), lItem['symbol']))
-            del lCStockInfoRequest
+
+        return EnumErrorCode.S_OK
+
+    def updateStockHistory(self, iSymbol, iTimestamp, iCount = -1):
+        lCStockHistoryRequest = CStockRequestHistory(iSymbol, iTimestamp, -1)
+        lRetcode, lRetList = lCStockHistoryRequest.getResult()
+
+        if gFaiedFunc(lRetcode):
+            return lRetcode
+
+        for lItem in lRetList:
+            lNewStockHistory = CStockHistory(iSymbol, lItem['timestamp'])
+            lNewStockHistory.populate(lItem)
+
+            lCount = gDatabaseService.countStockHistory(iSymbol, lItem['timestamp'])
+            if lCount > 0:
+                gDatabaseService.removeStockHistory(iSymbol, lItem['timestamp'])
+
+            hr = gDatabaseService.updateStockHistory(iSymbol, lItem['timestamp'], lNewStockHistory)
+            if hr != EnumErrorCode.S_OK:
+                gLogger.warning("{}: {} {}. Update failed: {}".format(gGetCurrentFunctionName(), iSymbol, lItem['timestamp'], hr))
+                continue
+
+        return EnumErrorCode.S_OK
+
 
 gUpdateService = CUpdateService()

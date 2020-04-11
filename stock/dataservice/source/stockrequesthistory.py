@@ -53,7 +53,7 @@ class CStockRequestHistory(CStockRequestBase):
         lUrl = gConfigFileWrapper.getStr('xue_qiu', 'history_url')
         lParams = {}
         lParams['symbol'] = iSymbol
-        lParams['begin'] = iBeginTime
+        lParams['begin'] = iBeginTime * 1000
         lParams['period'] = 'day'
         lParams['type'] = 'before'
         lParams['count'] = -iCount
@@ -62,13 +62,18 @@ class CStockRequestHistory(CStockRequestBase):
 
     def getResult(self):
         lResponseJson = CStockRequestBase.performRequest(self)
-        print lResponseJson
         if not self.__hValidateResult(lResponseJson):
             return EnumErrorCode.E_Validate_Fail
 
+        lResultList = []
         for lItem in lResponseJson["data"]["item"]:
-            print lItem
-        return EnumErrorCode.S_OK
+            lResultItem = {}
+            for i in range(0, len(lColumnName)):
+                if lColumnName[i][1]:
+                    lResultItem[lColumnName[i][0]] = lItem[i]
+            lResultList.append(lResultItem)
+
+        return EnumErrorCode.S_OK, lResultList
 
     def __hValidateResult(self, iDataJson):
         if iDataJson["error_code"] != 0:

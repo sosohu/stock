@@ -3,6 +3,6 @@
 *.pyc
 logs/*
 */tmp/*
-!*.keep
 data/db/*
+!*.keep
 
