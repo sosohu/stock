@@ -3,7 +3,7 @@
 
 from stock.common.enum import *
 from stock.common.utility import *
-from stock.objects.init import *
+from stock.common.base import *
 
 class CStockInfo():
     def __init__(self, iSymbol):
@@ -43,7 +43,7 @@ class CStockInfo():
                 return EnumErrorCode.E_Validate_His_Fail
 
         if len(self.__lStockInfoDataList) != len(iJson):
-            gLogger.warn("{}: stock info data lenght mismatch".format(gGetCurrentFunctionName()))
+            gLogger.warn("Stock {} validate failed: stock info data lenght mismatch".format(self.mSymbol))
 
         return EnumErrorCode.S_OK
     

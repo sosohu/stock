@@ -9,8 +9,8 @@ import os
 import sys
 import json
 import time
-
-from stock.dataservice.source.init import gConfigFileWrapper
+from stock.common.utility import *
+from stock.common.base import *
 
 def gCreateCookieFunc():
     lCookieFile = gConfigFileWrapper.getStr('xue_qiu', 'cookie_file')
@@ -66,6 +66,7 @@ class CStockRequestBase():
         self.mCurl.setopt(pycurl.COOKIEJAR, self.mCookieFile)
 
     def performRequest(self):
+        gLogger.debug("Start request to xueqiu. Url: {}".format(self.mUrl + '?' + urllib.urlencode(self.mParams)))
         self.mCurl.setopt(pycurl.URL, self.mUrl + '?' + urllib.urlencode(self.mParams))
         self.mCurl.perform()
         # Get the content stored in the BytesIO object (in byte characters) 

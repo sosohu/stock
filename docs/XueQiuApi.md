@@ -38,7 +38,7 @@ Response example:
 ## Stock history
 Request exmaple:
 ```
-https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601318&begin=1584280231249&period=day&type=before&count=-1&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
+https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601318&begin=1584280231249&period=day&type=after&count=1&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
 ```
 
 Response example:

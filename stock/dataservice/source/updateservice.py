@@ -4,8 +4,8 @@
 from pymongo import MongoClient
 
 from stock.common.utility import *
+from stock.common.base import *
 from stock.common.enum import *
-from stock.dataservice.source.init import *
 from stock.dataservice.source.stockrequestbase import gCreateCookieFunc
 from stock.dataservice.source.stockrequesthistory import *
 from stock.dataservice.source.stockrequestinfo import *
@@ -34,13 +34,14 @@ class CUpdateService():
 
                 hr = gDatabaseService.updateStockInfo(lItem['symbol'], lNewStockInfo)
                 if hr != EnumErrorCode.S_OK:
-                    gLogger.warning("{}: {}. Update failed: {}".format(gGetCurrentFunctionName(), lItem['symbol'], hr))
+                    gLogger.warning("Update stock {} info failed: result {}.".format(lItem['symbol'], hr))
                     continue
 
         return EnumErrorCode.S_OK
 
-    def updateStockHistory(self, iSymbol, iTimestamp, iCount = -1):
-        lCStockHistoryRequest = CStockRequestHistory(iSymbol, iTimestamp, iCount)
+    # update [iBeginTimestamp, iEndTimestamp)
+    def updateStockHistory(self, iSymbol, iBeginTimestamp, iEndTimestamp):
+        lCStockHistoryRequest = CStockRequestHistory(iSymbol, iBeginTimestamp, iEndTimestamp)
         lRetcode, lRetList = lCStockHistoryRequest.getResult()
 
         if gFaiedFunc(lRetcode):
@@ -58,19 +59,34 @@ class CUpdateService():
 
             hr = gDatabaseService.updateStockHistory(iSymbol, lItem['timestamp'], lNewStockHistory)
             if hr != EnumErrorCode.S_OK:
-                gLogger.warning("{}: {} {}. Update failed: {}".format(gGetCurrentFunctionName(), iSymbol, lItem['timestamp'], hr))
+                gLogger.warning("Update stock {} history at timestamp {} failed: result {}.".format(iSymbol, lItem['timestamp'], hr))
                 continue
 
         return EnumErrorCode.S_OK
 
-    def updateAllStockHistory(self, iTimestamp, iCount = -1):
+    def updateAllStockHistory(self):
+        lLastUpdateTimeStamp = gDatabaseService.getPropertyValue('update_time')
+        if lLastUpdateTimeStamp is None:
+            lLastUpdateTimeStamp = gConfigFileWrapper.getLong('stock', 'start_time')
+        else:
+            lLastUpdateTimeStamp = int(lLastUpdateTimeStamp)
+
+        lTodayTimeStamp = gGetTodayTimeStampFunc()
+
+        lCount = gGetDiffDaysFunc(lLastUpdateTimeStamp, lTodayTimeStamp)
+        if lCount == 0:
+            gLogger.debug("Database has already had the lastest result, do not need to update")
+            return EnumErrorCode.S_OK
+
         lList = []
         hr = gDatabaseService.getStockSymbols(lList)
         if gFaiedFunc(hr):
             return hr
 
         for lItem in lList:
-            self.updateStockHistory(lItem, iTimestamp, iCount)
+            self.updateStockHistory(lItem, lLastUpdateTimeStamp, lTodayTimeStamp)
+
+        gDatabaseService.setPropertyValue('update_time', str(lTodayTimeStamp))
 
         return EnumErrorCode.S_OK
 

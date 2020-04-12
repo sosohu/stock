@@ -3,7 +3,7 @@
 
 from stock.common.enum import *
 from stock.common.utility import *
-from stock.objects.init import *
+from stock.common.base import *
 
 class CStockHistory():    
     def __init__(self, iSymbol, iTimestamp):
@@ -112,7 +112,7 @@ class CStockHistory():
 
     
     # Json standard
-    __lStockHistoryDataList = ['volume', 'open', 'high', 'low', 'close', 'chg',\
+    __lStockHistoryDataList = ['timestamp', 'volume', 'open', 'high', 'low', 'close', 'chg',\
                     'percent', 'turnoverrate', 'amount', 'pe', 'pb',\
                     'ps', 'pcf', 'market_capital']
 
@@ -121,20 +121,20 @@ class CStockHistory():
         if gFaiedFunc(lHr):
             return lHr
 
-        self.mVolume = iJson['volume']
-        self.mOpenPrice = iJson['open']
-        self.mHighPrice = iJson['high']
-        self.mLowPrice = iJson['low']
-        self.mClosePrice = iJson['close']
-        self.mChangePrice = iJson['chg']
-        self.mChangePercent = iJson['percent']
-        self.mTurnoverRate = iJson['turnoverrate']
-        self.mAmount = iJson['amount']
-        self.mPE = iJson['pe']
-        self.mPB = iJson['pb']
-        self.mPS = iJson['ps']
-        self.mPCF = iJson['pcf']
-        self.mMarketCapital = iJson['market_capital']
+        self.mVolume = iJson['volume'] or -1
+        self.mOpenPrice = iJson['open'] or -1
+        self.mHighPrice = iJson['high'] or -1
+        self.mLowPrice = iJson['low'] or -1
+        self.mClosePrice = iJson['close'] or -1
+        self.mChangePrice = iJson['chg'] or -1
+        self.mChangePercent = iJson['percent'] or -1
+        self.mTurnoverRate = iJson['turnoverrate'] or -1
+        self.mAmount = iJson['amount'] or -1
+        self.mPE = iJson['pe'] or -1
+        self.mPB = iJson['pb'] or -1
+        self.mPS = iJson['ps'] or -1
+        self.mPCF = iJson['pcf'] or -1
+        self.mMarketCapital = iJson['market_capital'] or -1
 
         return EnumErrorCode.S_OK
 
@@ -160,10 +160,9 @@ class CStockHistory():
     def __ValidateData(self, iJson):
         for lKey in self.__lStockHistoryDataList:
             if iJson[lKey] is None:
-                gLogger.error("{}: stock history expect key {} not exist".format(gGetCurrentFunctionName(), lKey))
-                return EnumErrorCode.E_Validate_His_Fail
+                gLogger.warn("Stock {} at timestamp {}: stock history expect key {} not exist".format(self.mSymbol, self.mTimestamp, lKey))
 
         if len(self.__lStockHistoryDataList) != len(iJson):
-            gLogger.warn("{}: stock history data length mismatch".format(gGetCurrentFunctionName()))
+            gLogger.warn("Stock {} at timestamp {}: stock history data length mismatch".format(self.mSymbol, self.mTimestamp))
 
         return EnumErrorCode.S_OK

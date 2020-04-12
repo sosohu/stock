@@ -6,8 +6,8 @@ import urllib
 import pycurl
 import json
 from stock.common.utility import *
+from stock.common.base import *
 from stock.common.enum import *
-from stock.dataservice.source.init import *
 from stock.dataservice.source.stockrequestbase import *
 
 '''
@@ -28,13 +28,14 @@ class CStockRequestInfo(CStockRequestBase):
         CStockRequestBase.__init__(self, "stock_info", lUrl, lParams)
 
     def getResult(self):
+        gLogger.debug("Try to get result from warehouse: url {} param {}".format(self.mUrl, self.mParams))
         lResponseJson = CStockRequestBase.performRequest(self)
         if lResponseJson['success']:
             lResultList = []
-            gLogger.info("{}: {}".format(gGetCurrentFunctionName(), lResponseJson))
             for lItem in lResponseJson['stocks']:
                 lResultList.append({ 'symbol': lItem['symbol'], 'name': lItem['name'] })
+            gLogger.debug("Get result from warehouse: result {}".format(lResultList))
             return EnumErrorCode.S_OK, lResultList
         else:
-            gLogger.error("{}: {}".format(gGetCurrentFunctionName(), lResponseJson))
+            gLogger.error("Get result from warehouse: result {}".format(lResponseJson))
             return EnumErrorCode.E_Warehouse_No_Result

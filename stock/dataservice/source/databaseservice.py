@@ -7,10 +7,14 @@ from pymongo import MongoClient
 from enum import Enum
 
 from stock.common.utility import *
-from stock.dataservice.source.init import *
+from stock.common.base import *
 from stock.objects.stockinfo import *
 from stock.objects.stockhistory import *
 from stock.objects.stockinstance import *
+
+class EnumColPropInfo(Enum):
+    PropName = 1
+    PropVal = 2
 
 class EnumColStockInfo(Enum):
     Symbol = 1
@@ -45,11 +49,19 @@ class CDatabaseService():
         self.mMongoClient = MongoClient(gConfigFileWrapper.getStr('mongo', 'connect_url'))
         self.mDb = self.mMongoClient[gConfigFileWrapper.getStr('mongo', 'database')]
 
+        self.mColPropInfoName = 'property_info'
+        self.mColPropInfo = self.mDb[self.mColPropInfoName]
+        self.mColPropInfoKeys = {}
+        self.mColPropInfoKeys[EnumColPropInfo.PropName] = 'prop_name'
+        self.mColPropInfoKeys[EnumColPropInfo.PropVal] = 'prop_val'
+
+        self.mColStockInfoName = 'stock_info'
         self.mColStockInfo = self.mDb['stock_info']
         self.mColStockInfoKeys = {}
         self.mColStockInfoKeys[EnumColStockInfo.Symbol] = 'symbol'
         self.mColStockInfoKeys[EnumColStockInfo.Name] = 'name'
 
+        self.mColStockHistName = 'stock_history'
         self.mColStockHist = self.mDb['stock_history']
         self.mColStockHistKeys = {}
         self.mColStockHistKeys[EnumColStockHistory.Symbol] = 'symbol'
@@ -75,11 +87,43 @@ class CDatabaseService():
     def __del__(self):
         return
 
+    def getPropertyValue(self, iPropName):
+        lQuery = {}
+        lQuery[self.mColPropInfoKeys[EnumColPropInfo.PropName]] = iPropName
+
+        gLogger.debug("Collection {} query : query {}, projection {{}}.".format(self.mColPropInfoName, lQuery))
+        lResultCursor = self.mColPropInfo.find(lQuery)
+        lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColPropInfoName, lResultList))
+
+        if len(lResultList) > 1:
+            gLogger.warning("{} has {} records in property_info collection".format(iPropName, len(lResultList)))
+        elif len(lResultList) == 1:
+            return lResultList[0][self.mColPropInfoKeys[EnumColPropInfo.PropVal]]
+
+        return 
+
+    def setPropertyValue(self, iPropName, iPropValue):
+        lQuery = {}
+        lQuery[self.mColPropInfoKeys[EnumColPropInfo.PropName]] = iPropName
+        lData = {}
+        lData["$set"] = {}
+        lData["$set"][self.mColPropInfoKeys[EnumColPropInfo.PropVal]] = iPropValue
+
+        gLogger.debug("Collection {} update : query {} , data: {}.".format(self.mColPropInfoName, lQuery, lData))
+        hr = self.mColPropInfo.update(lQuery, lData, upsert = True)
+        gLogger.debug("Collection {} update : result: {}".format(self.mColPropInfoName, hr))
+
+        return EnumErrorCode.S_OK
+
     def getStockSymbols(self, oList):
         lProjection = {}
         lProjection[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = 1
+
+        gLogger.debug("Collection {} query : query {{}}, projection {}.".format(self.mColStockInfoName, lProjection))
         lResultCursor = self.mColStockInfo.find({}, lProjection)
         lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColStockInfoName, lResultList))
 
         for lItem in lResultList:
             oList.append(lItem[self.mColStockInfoKeys[EnumColStockInfo.Symbol]])
@@ -91,21 +135,22 @@ class CDatabaseService():
         lQuery = {}
         lQuery[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = iSymbol
         
-        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lQuery))
-
+        gLogger.debug("Collection {} query : query {}, projection {{}}.".format(self.mColStockInfoName, lQuery))
         lResultCursor = self.mColStockInfo.find(lQuery)
-        return len(list(lResultCursor))
+        lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColStockInfoName, lResultList))
+        return len(lResultList)
 
     def getStockInfo(self, iSymbol, oStockInfo):
         lQuery = {}
         lQuery[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = iSymbol
         
-        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lQuery))
-
+        gLogger.debug("Collection {} query : query {}, projection {{}}.".format(self.mColStockInfoName, lQuery))
         lResultCursor = self.mColStockInfo.find(lQuery)
         lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColStockInfoName, lResultList))
         if len(lResultList) > 1:
-            gLogger.warning("{}: {} has {} records".format(gGetCurrentFunctionName(), iSymbol, len(lResultList)))
+            gLogger.warning("{}: {} has {} records".format(self.mColStockInfoName, iSymbol, len(lResultList)))
             return EnumErrorCode.E_Database_Multi_Result
         elif len(lResultList) == 1:
             oStockInfo.setName(lResultList[0][self.mColStockInfoKeys[EnumColStockInfo.Name]])
@@ -123,17 +168,19 @@ class CDatabaseService():
         lData["$set"] = {}
         lData["$set"][self.mColStockInfoKeys[EnumColStockInfo.Name]] = iStockInfo.getName()
 
+        gLogger.debug("Collection {} update : query {}, data {}.".format(self.mColStockInfoName, lQuery, lData))
         hr = self.mColStockInfo.update(lQuery, lData, upsert = True)
+        gLogger.debug("Collection {} update : result {}.".format(self.mColStockInfoName, hr))
 
-        gLogger.debug("{}: {}. Return: {}".format(gGetCurrentFunctionName(), lData, hr))
         return EnumErrorCode.S_OK
 
     def removeStockInfo(self, iSymbol):
         lQuery = {}
         lQuery[self.mColStockInfoKeys[EnumColStockInfo.Symbol]] = iSymbol
+        gLogger.debug("Collection {} remove : query {}.".format(self.mColStockInfoName, lQuery))
         hr =  self.mColStockInfo.delete_many(lQuery)
+        gLogger.debug("Collection {} remove : result {}.".format(self.mColStockInfoName, hr))
 
-        gLogger.debug("{}: {}. Return: {}".format(gGetCurrentFunctionName(), lQuery, hr))
         return EnumErrorCode.S_OK
 
     def countStockHistory(self, iSymbol, iTimestamp):
@@ -141,22 +188,24 @@ class CDatabaseService():
         lQuery[self.mColStockHistKeys[EnumColStockHistory.Symbol]] = iSymbol
         lQuery[self.mColStockHistKeys[EnumColStockHistory.TimeStamp]] = iTimestamp
 
-        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lQuery))
-
+        gLogger.debug("Collection {} query : query {}, projection {{}}.".format(self.mColStockHistName, lQuery))
         lResultCursor = self.mColStockHist.find(lQuery)
-        return len(list(lResultCursor))
+        lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColStockHistName, lResultList))
+        return len(lResultList)
 
     def getStockHistory(self, iSymbol, iTimestamp, oStockHistoy):
         lQuery = {}
         lQuery[self.mColStockHistKeys[EnumColStockHistory.Symbol]] = iSymbol
         lQuery[self.mColStockHistKeys[EnumColStockHistory.TimeStamp]] = iTimestamp
 
-        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lQuery))
-
+        gLogger.debug("Collection {} query : query {}, projection {{}}.".format(self.mColStockHistName, lQuery))
         lResultCursor = self.mColStockHist.find(lQuery)
         lResultList = list(lResultCursor)
+        gLogger.debug("Collection {} query : result {}.".format(self.mColStockHistName, lResultList))
+
         if len(lResultList) > 1:
-            gLogger.warning("{}: {} has {} records".format(gGetCurrentFunctionName(), iSymbol, len(lResultList)))
+            gLogger.warning("{}: {} at timestamp {} has {} records".format(self.mColStockHistName, iSymbol, iTimestamp, len(lResultList)))
             return EnumErrorCode.E_Database_Multi_Result
         elif len(lResultList) == 1:
             lRecord = lResultList[0][self.mColStockHistKeys[EnumColStockHistory.Record]]
@@ -204,19 +253,20 @@ class CDatabaseService():
         lRecord[self.mColStockHistRecordKeys[EnumColStockHistoryRecord.MarketCapital]] = iStockHistoy.getMarketCapital()
         lData["$set"][self.mColStockHistKeys[EnumColStockHistory.Record]] = lRecord
         
-        gLogger.debug("{}: {}".format(gGetCurrentFunctionName(), lData))
+        gLogger.debug("Collection {} update : query {}, data {}.".format(self.mColStockHistName, lQuery, lData))
         hr = self.mColStockHist.update(lQuery, lData, upsert = True)
+        gLogger.debug("Collection {} update : result {}.".format(self.mColStockHistName, hr))
 
-        gLogger.debug("{}: {}. Return: {}".format(gGetCurrentFunctionName(), lData, hr))
         return EnumErrorCode.S_OK
 
     def removeStockHistory(self, iSymbol, iTimestamp):
         lQuery = {}
         lQuery[self.mColStockHistKeys[EnumColStockHistory.Symbol]] = iSymbol
         lQuery[self.mColStockHistKeys[EnumColStockHistory.TimeStamp]] = iTimestamp
+        gLogger.debug("Collection {} remove : query {}.".format(self.mColStockHistName, lQuery))
         hr =  self.mColStockHist.delete_many(lQuery)
+        gLogger.debug("Collection {} remove : result {}.".format(self.mColStockHistName, hr))
 
-        gLogger.debug("{}: {}. Return: {}".format(gGetCurrentFunctionName(), lQuery, hr))
         return EnumErrorCode.S_OK
 
 

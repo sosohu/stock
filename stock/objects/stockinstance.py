@@ -3,6 +3,7 @@
 
 from stock.common.enum import *
 from stock.common.utility import *
+from stock.common.base import *
 from stock.objects.stockhistory import *
 from stock.objects.stockinfo import *
 
@@ -26,7 +27,7 @@ class CStockInstance():
             self.mHistory[timestamp] = CStockHistory(self.mSymbol, timestamp)
             lHr = self.mHistory[timestamp].populate(record)
             if gFaiedFunc(lHr):
-                gLogger.warn("{}: {}'s stock history data populate failed".format(gGetCurrentFunctionName(), timestamp))
+                gLogger.warn("Stock {} populate history at timestamp {} failed: result {}".format(self.mSymbol, timestamp, lHr))
 
         return EnumErrorCode.S_OK
 
@@ -36,7 +37,7 @@ class CStockInstance():
         for timestamp, record in self.mHistory.items():
             lHr = record.serialize(record)
             if gFaiedFunc(lHr):
-                gLogger.warn("{}: {}'s stock history data serialize failed".format(gGetCurrentFunctionName(), timestamp))
+                gLogger.warn("stock {} serialize failed at timestamp {} failed: result {}".format(self.mSymbol, timestamp, lHr))
 
         return EnumErrorCode.S_OK
         

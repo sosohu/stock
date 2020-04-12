@@ -4,6 +4,7 @@
 import time
 import inspect
 from stock.common.enum import *
+from datetime import date, datetime
 
 def gNowTimeFunc():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
@@ -17,5 +18,12 @@ def gNowTimeStampFunc():
 def gFaiedFunc(iCode):
     return iCode != EnumErrorCode.S_OK
 
-def gGetCurrentFunctionName():
-    return inspect.stack()[1][3]
+def gGetTodayTimeStampFunc():
+    lTime = time.strftime("%Y-%m-%d 00:00:00", time.localtime())
+    return int(time.mktime(datetime.strptime(lTime, "%Y-%m-%d %H:%M:%S").timetuple()))
+
+def gGetDiffDaysFunc(iBeginTime, iEndTime):
+    if iBeginTime >= iEndTime:
+        return 0
+        
+    return int((iEndTime - iBeginTime) / (24 * 60 * 60))
